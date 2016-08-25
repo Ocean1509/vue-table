@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>vue-table</title>
+	<link rel="stylesheet" href="../css/bootstrap.css">
+	<link rel="stylesheet" href="./search.css">
+	<script type="text/javascript" src="../lib/jquery-3.1.0.min.js"></script>
+	<script type="text/javascript" src="../lib/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="content" id="app">
+		<search :searchmsg.sync="searchmsg"></search>
+		<main-table :titledata="titledata" :maindata="maindata" :searchmsg="searchmsg" :show.sync='show' :person.sync="person"></main-table>
+		<create  :show.sync="show"></create>
+		<dialog :createdata='createdata' :maindata='maindata' :show.sync="show" :person.sync="person"></dialog>
+	</div>
+
+	<template id="J_search" >
+		<div class="input-group input-group-lg">
+			<span class="input-group-addon" id="sizing-addon1">搜索</span>
+			<input type="text" class="form-control" placeholder="关键字" aria-describedby="sizing-addon1" v-model="searchmsg"></div>
+	</template>
+	<template id="J_table">
+		<table class="table table-hover table-bordered table-striped">
+			<thead>
+				<tr>
+					<th v-for="col in titledata">{{col}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="(index,lists) in maindata |filterBy searchmsg">
+					<td v-for="list in lists">{{list}}</td>
+					<td class="handle">
+						<button class="btn btn-danger" @click="deletet(index)">删除</button>
+						<!-- <button class="btn btn-warning" @click='modify(index)'>修改</button> -->
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</template>
+	<template id="J_create">
+		<button class="btn btn-success" @click="create">新建</button>
+	</template>
+
+	<template id="J_dialog">
+		<div class="alldialogs" :class="{ 'dialog-active': show }">
+			<div class="dialogbg" @click='close'></div>
+			<div class="dialogs">
+				<h3>新建</h3>
+				<div class="input-group input-group-lg">
+					<span class="input-group-addon">姓名</span>
+					<input type="text" class="form-control" placeholder="{{createdata.name}}" v-model="name"></div>
+				<div class="input-group input-group-lg">
+					<span class="input-group-addon">年龄</span>
+					<input type="text" class="form-control" placeholder="{{createdata.age}}" v-model="age"></div>
+				<div class="input-group input-group-lg">
+					<span class="input-group-addon">性别</span>
+						<select class="form-control dropdown-menu" v-model="sex">
+							<option v-for='sex in createdata.sex'>{{sex}}</option>
+						</select>
+				</div>
+				<button class="btn btn-success dialognew" @click="save">保存</button>
+				<button class="btn btn-danger dialognew" @click="close">关闭</button>
+
+			</div>
+		</template>
+</body>
+		<script src="../lib/vue.js"></script>
+		<script>
+	Vue.component("search",{
+		template:"#J_search",
+		props:["searchmsg"]
+	})
+	Vue.component('main-table',{
+		template:"#J_table",
+		props:["titledata","maindata","searchmsg","show","person"],
+		methods:{
+			deletet:function(index){
+				this.maindata.splice(index,1)
+			},
+			// modify:function(index){
+			// 	this.person.name=this.maindata[index].name;
+			// 	this.person.age=this.maindata[index].age;
+			// 	this.person.sex=this.maindata[index].sex;
+			// 	console.log(this.person.age);
+			// 	console.log(this.person.all)
+			// 	this.show=false
+			// }
+		}
+	})
+	Vue.component("create",{
+		template:"#J_create",
+		props:['show'],
+		methods:{
+			create:function(){
+				this.show=false
+			}
+		}
+	})
+	Vue.component("dialog",{
+		template:"#J_dialog",
+		props:['createdata','maindata','show',"person"],
+		data:function(){
+			return {
+				name:this.person.name,
+				age:this.person.age,
+				sex:this.person.sex
+			}
+		},
+		methods:{
+			save:function(){
+				this.person.all.name=this.name;
+				this.person.all.age=this.age;
+				this.person.all.sex=this.sex;
+				if(this.person.all.name&&this.person.all.age&&this.person.all.sex){
+					this.maindata.push(this.person.all);
+					this.person.all={};
+					this.show=true;
+				}
+			},
+			close:function(){
+				this.show=true
+			}
+
+		}
+	})
+	new Vue({
+		el:"#app",
+		data:{
+			searchmsg:'',
+			show:true,
+			person:{
+				name:'',
+				age:'',
+				sex:'',
+				all:{}
+			},
+			titledata:['姓名',"年龄","性别","操作"],
+			maindata:[
+				{
+					"name":"张三",
+					"age":29,
+					"sex":"male",
+				},
+				{
+					"name":"李四",
+					"age":34,
+					"sex":"female",
+				},
+				{
+					"name":"王五",
+					"age":24,
+					"sex":"male",
+				},
+				{
+					"name":"小吴",
+					"age":15,
+					"sex":"male",
+				},
+				{
+					"name":"王艳",
+					"age":20,
+					"sex":"female",
+				},
+				{
+					"name":"沃野",
+					"age":24,
+					"sex":"male",
+				}
+			],
+			createdata:{
+				name:'name',
+				age:'age',
+				sex:['male','female']
+			}
+		}
+	})
+</script>
+	</html>
